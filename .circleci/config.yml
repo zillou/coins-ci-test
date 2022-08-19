@@ -3,9 +3,15 @@ version: 2.1
 orbs: 
   aws-ecr: circleci/aws-ecr@8.1.2
 
+executors:
+  docker-build-executor:
+    machine:
+      image: ubuntu-2004:current
+
 jobs:
   dockerise:
-    executor: aws-ecr/default
+    # executor: aws-ecr/default
+    executor: docker-build-executor
     resource_class: arm.medium
     steps:
       - aws-ecr/build-and-push-image:
@@ -16,10 +22,17 @@ jobs:
           checkout: true
           repo: coins
           tag: 'latest'
-
+  my-job:
+    machine:
+      image: ubuntu-2004:202101-01
+    resource_class: arm.medium
+    steps:
+      - run: uname -a
+      - run: echo "Hello, Arm!"
 
 workflows:
   dev-build:
     jobs:
       - dockerise:
           context: coins-ci
+      - my-job
