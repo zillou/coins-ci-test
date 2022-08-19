@@ -1,8 +1,8 @@
 version: 2.1
 
 orbs: 
-  aws-ecr: circleci/aws-ecr@8.1.2
   aws-ecs: circleci/aws-ecs@3.1.0
+  aws-cli: circleci/aws-cli@3.1
 
 executors:
   docker-build-executor:
@@ -10,25 +10,64 @@ executors:
       image: ubuntu-2004:current
 
 jobs:
+  # dockerise:
+  #   # executor: aws-ecr/default
+  #   executor: docker-build-executor
+  #   resource_class: arm.medium
+  #   steps:
+  #     - aws-ecr/build-and-push-image:
+  #         aws-cli-version: latest
+  #         no-output-timeout: 20m
+  #         platform: linux/arm64
+  #         push-image: true
+  #         checkout: true
+  #         repo: coins
+  #         tag: ${CIRCLE_SHA1}
   dockerise:
-    # executor: aws-ecr/default
     executor: docker-build-executor
     resource_class: arm.medium
+    parameters:
+      repo:
+        description: "ECR repo name, e.g. messenger"
+        type: string
+      tag:
+        description: "The image tag, e.g. v1.0.0"
+        type: string
+      push-image:
+        type: boolean
+        default: true
     steps:
-      - aws-ecr/build-and-push-image:
-          aws-cli-version: latest
-          no-output-timeout: 20m
-          platform: linux/arm64
-          push-image: true
-          checkout: true
-          repo: coins
-          tag: ${CIRCLE_SHA1}
-
+      - checkout
+      - run:
+          name: Build docker image
+          command: |
+            docker build -t ${AWS_ECR_ACCOUNT_URL}/<< parameters.repo >>:<< parameters.tag >> .
+      - when:
+          condition: <<parameters.push-image>>
+          steps:
+            - aws-cli/setup:
+                aws-region: AWS_REGION
+            - run:
+                name: Check Identity
+                command: |
+                  aws sts get-caller-identity
+            - run:
+                name: Docker login
+                command: |
+                  aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ECR_ACCOUNT_URL}
+            - run:
+                name: Push docker image
+                command: |
+                  docker push ${AWS_ECR_ACCOUNT_URL}/<< parameters.repo >>:<< parameters.tag >>
 workflows:
   dev-build:
     jobs:
       - dockerise:
           context: coins-ci
+          tag: ${CIRCLE_SHA1}
+          repo: coins
+          push-image: true
+
       - aws-ecs/deploy-service-update:
           container-image-name-updates: 'container=app,tag=${CIRCLE_SHA1}'
           cluster: dev
