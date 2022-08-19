@@ -38,7 +38,7 @@ workflows:
       - dockerise:
           context: coins-ci
       - aws-ecs/deploy-service-update:
-          container-image-name-updates: 'container=app,image_and_tag=019265565259.dkr.ecr.ap-southeast-1.amazonaws.com/coins:${CIRCLE_SHA1}'
+          container-image-name-updates: 'container=app,tag=${CIRCLE_SHA1}'
           cluster: 'dev'
           family: 'coins'
           context: coins-ci
