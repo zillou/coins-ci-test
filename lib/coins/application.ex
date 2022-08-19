@@ -9,7 +9,7 @@ defmodule Coins.Application do
   def start(_type, _args) do
     children = [
       # Start the Ecto repository
-      Coins.Repo,
+      # Coins.Repo,
       # Start the Telemetry supervisor
       CoinsWeb.Telemetry,
       # Start the PubSub system
