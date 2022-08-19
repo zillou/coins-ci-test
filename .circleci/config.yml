@@ -18,7 +18,7 @@ jobs:
       - aws-ecr/build-and-push-image:
           aws-cli-version: latest
           no-output-timeout: 20m
-          platform: linux/amd64
+          platform: linux/arm64
           push-image: true
           checkout: true
           repo: coins
