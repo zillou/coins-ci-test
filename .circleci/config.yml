@@ -1,0 +1,17 @@
+version: 2.1
+
+orbs: 
+  aws-ecr: circleci/aws-ecr@8.1.2
+
+workflows:
+  build_and_push_image:
+    jobs:
+      - aws-ecr/build-and-push-image:
+          aws-cli-version: latest
+          context: coins-ci
+          executor: aws-ecr/default
+          no-output-timeout: 20m
+          platform: linux/amd64
+          push-image: true
+          repo: coins
+          tag: 'latest'
