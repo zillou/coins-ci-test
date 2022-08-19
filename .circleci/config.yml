@@ -2,6 +2,7 @@ version: 2.1
 
 orbs: 
   aws-ecr: circleci/aws-ecr@8.1.2
+  aws-ecs: circleci/aws-ecs@3.1.0
 
 executors:
   docker-build-executor:
@@ -21,7 +22,8 @@ jobs:
           push-image: true
           checkout: true
           repo: coins
-          tag: 'latest'
+          tag: ${CIRCLE_SHA1}'
+
   my-job:
     machine:
       image: ubuntu-2004:202101-01
@@ -35,4 +37,11 @@ workflows:
     jobs:
       - dockerise:
           context: coins-ci
+      - aws-ecs/deploy-service-update:
+          container-image-name-updates: 'container=app,image_and_tag=019265565259.dkr.ecr.ap-southeast-1.amazonaws.com/coins:${CIRCLE_SHA1}'
+          cluster: 'dev'
+          family: 'coins'
+          context: coins-ci
+          requires:
+            - dockerise
       - my-job
