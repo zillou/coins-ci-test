@@ -24,14 +24,6 @@ jobs:
           repo: coins
           tag: ${CIRCLE_SHA1}
 
-  my-job:
-    machine:
-      image: ubuntu-2004:202101-01
-    resource_class: arm.medium
-    steps:
-      - run: uname -a
-      - run: echo "Hello, Arm!"
-
 workflows:
   dev-build:
     jobs:
@@ -39,9 +31,9 @@ workflows:
           context: coins-ci
       - aws-ecs/deploy-service-update:
           container-image-name-updates: 'container=app,tag=${CIRCLE_SHA1}'
-          cluster: 'dev'
-          family: 'coins'
+          cluster: dev
+          family: coins
           context: coins-ci
+          service-name: dev-coins-service 
           requires:
             - dockerise
-      - my-job
