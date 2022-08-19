@@ -22,7 +22,7 @@ jobs:
           push-image: true
           checkout: true
           repo: coins
-          tag: ${CIRCLE_SHA1}'
+          tag: ${CIRCLE_SHA1}
 
   my-job:
     machine:
