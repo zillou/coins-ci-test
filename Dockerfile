@@ -67,7 +67,7 @@ RUN mix release
 # the compiled release and other runtime necessities
 FROM ${RUNNER_IMAGE}
 
-RUN apk add --no-cache openssl ncurses-libs curl
+RUN apk add --no-cache libstdc++ openssl ncurses-libs curl
 
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
